@@ -17,14 +17,6 @@
           pkgs = pkgsForSys system;
         in
         {
-          devShells.default = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              qemu
-              llvmPackages_16.clang
-              llvmPackages_16.bintools
-            ];
-          };
-
           packages.hello = pkgs.stdenv.mkDerivation {
             name = "hello-baremetal";
             buildInputs = with pkgs.llvmPackages_16; [
@@ -40,6 +32,17 @@
               mkdir -p $out/bin
               mv hello $out/bin
             '';
+          };
+
+          devShells.default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              qemu
+              llvmPackages_16.clang
+              llvmPackages_16.bintools
+            ];
+            env = {
+              BIOS_BIN_PATH = "${self.packages."${system}".hello}/bin/hello";
+            };
           };
 
           formatter = pkgs.nixpkgs-fmt;
